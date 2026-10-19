@@ -93,10 +93,10 @@ export default function Sidebar({
         </div>
 
         <div className="border-b border-white/10 px-5 py-4">
-          <div className="flex items-center gap-2 rounded-xl border border-amber-400/15 bg-amber-400/5 px-3 py-2">
-            <span className="h-2 w-2 rounded-full bg-amber-400" />
-            <span className="text-xs font-medium text-amber-200">
-              API未接続・開発モード
+          <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+            <ShieldCheck size={15} className="text-slate-400" />
+            <span className="text-xs font-medium text-slate-300">
+              管理コンソール
             </span>
           </div>
         </div>

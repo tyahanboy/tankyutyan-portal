@@ -3,11 +3,14 @@ import { Clock3, ExternalLink, Search, SlidersHorizontal } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge'
 import { demoSearchHistory } from '../data'
 
+// サンプル履歴を実データとして表示しない
+const searchHistory: typeof demoSearchHistory = []
+
 export default function SearchHistoryView() {
   const [keyword, setKeyword] = useState('')
   const [filter, setFilter] = useState('all')
 
-  const filteredHistory = demoSearchHistory.filter((item) => {
+  const filteredHistory = searchHistory.filter((item) => {
     const matchesKeyword = [item.query, item.source]
       .some((value) => value.toLowerCase().includes(keyword.toLowerCase()))
 
@@ -26,7 +29,7 @@ export default function SearchHistoryView() {
           <Search size={22} className="text-blue-300" />
           <p className="mt-4 text-sm text-slate-400">検索回数</p>
           <p className="mt-2 text-3xl font-bold text-white">
-            {demoSearchHistory.length}
+            {searchHistory.length}
           </p>
         </article>
 
@@ -34,7 +37,7 @@ export default function SearchHistoryView() {
           <Clock3 size={22} className="text-emerald-300" />
           <p className="mt-4 text-sm text-slate-400">検索成功</p>
           <p className="mt-2 text-3xl font-bold text-white">
-            {demoSearchHistory.filter((item) => item.status === 'success').length}
+            {searchHistory.filter((item) => item.status === 'success').length}
           </p>
         </article>
 
@@ -42,7 +45,7 @@ export default function SearchHistoryView() {
           <SlidersHorizontal size={22} className="text-violet-300" />
           <p className="mt-4 text-sm text-slate-400">取得した検索結果</p>
           <p className="mt-2 text-3xl font-bold text-white">
-            {demoSearchHistory.reduce((total, item) => total + item.resultCount, 0)}
+            {searchHistory.reduce((total, item) => total + item.resultCount, 0)}
           </p>
         </article>
       </section>
@@ -121,7 +124,7 @@ export default function SearchHistoryView() {
                   </span>
                   <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
                     <ExternalLink size={13} />
-                    検索詳細は未実装
+                    詳細情報なし
                   </span>
                 </div>
               </article>
@@ -138,7 +141,7 @@ export default function SearchHistoryView() {
                 : '検索履歴はまだありません'}
             </p>
             <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
-              現在はデモモードです。検索履歴の取得にはBot APIとの連携が必要やで。
+              Bot APIから取得した検索履歴がここに表示されます。現在、表示できる履歴はありません。
             </p>
           </div>
         )}

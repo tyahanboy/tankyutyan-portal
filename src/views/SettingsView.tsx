@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { apiFetch } from '../lib/api'
 import {
   Check,
   RotateCcw,
@@ -13,6 +14,60 @@ import { defaultSettings } from '../data'
 export default function SettingsView() {
   const [settings, setSettings] = useState({ ...defaultSettings })
   const [saved, setSaved] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let active = true
+
+    async function loadSettings() {
+      try {
+        const response = await apiFetch('/api/settings')
+        const data = await response.json()
+        if (!response.ok || !data.ok || !data.settings) {
+          throw new Error(data.message || '設定を読み込めへんかったよ')
+        }
+        if (active) {
+          setSettings(data.settings)
+          setSaved(false)
+          setError('')
+        }
+      } catch (err) {
+        if (active) {
+          setError(err instanceof Error ? err.message : '設定の読み込みに失敗したよ')
+        }
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+
+    void loadSettings()
+    return () => { active = false }
+  }, [])
+
+  async function saveSettings() {
+    setSaving(true)
+    setError('')
+    setSaved(false)
+    try {
+      const response = await apiFetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings),
+      })
+      const data = await response.json()
+      if (!response.ok || !data.ok || !data.settings) {
+        throw new Error(data.message || '設定を保存できへんかったよ')
+      }
+      setSettings(data.settings)
+      setSaved(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '設定の保存に失敗したよ')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   function updateSetting<K extends keyof typeof defaultSettings>(
     key: K,
@@ -175,12 +230,15 @@ export default function SettingsView() {
           <div>
             <p className="font-medium text-white">設定の変更</p>
             <p className="mt-1 text-sm text-slate-400">
-              現在は画面上のデモ設定です。Bot本体への反映はまだ行いません。
+              {loading ? '保存済みの設定を読み込み中…' : '変更内容は保存ボタンを押すと設定データベースに反映されるで。'}
             </p>
+            {error && (
+              <p role="alert" className="mt-3 text-sm text-red-300">{error}</p>
+            )}
             {saved && (
-              <p className="mt-3 flex items-center gap-2 text-sm text-emerald-300">
+              <p role="status" className="mt-3 flex items-center gap-2 text-sm text-emerald-300">
                 <Check size={16} />
-                画面内の設定を確定したで！
+                設定を保存したで！
               </p>
             )}
           </div>
@@ -196,11 +254,12 @@ export default function SettingsView() {
             </button>
             <button
               type="button"
-              onClick={() => setSaved(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-400"
+              onClick={() => void saveSettings()}
+              disabled={loading || saving}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Save size={16} />
-              設定を確定
+              {saving ? '保存中…' : '設定を保存'}
             </button>
           </div>
         </div>
